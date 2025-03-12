@@ -120,17 +120,8 @@ export default function NewTransactionForm({
                     | { nickname: string; accountNumber: string },
                   index: number
                 ) => (
-                  <SelectItem
-                    key={index}
-                    value={
-                      'nickname' in recipient
-                        ? recipient.nickname
-                        : recipient.nickname
-                    }
-                  >
-                    {'nickname' in recipient
-                      ? recipient.nickname
-                      : recipient.nickname}
+                  <SelectItem key={index} value={recipient.nickname}>
+                    {recipient.nickname}
                   </SelectItem>
                 )
               )}
