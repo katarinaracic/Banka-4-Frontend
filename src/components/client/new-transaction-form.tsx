@@ -26,6 +26,7 @@ import { RecipientDto } from '@/api/response/recipient';
 import { AccountDto } from '@/api/response/account';
 import { Switch } from '@/components/ui/switch';
 import { SomePartial } from '@/types/utils';
+import {ClientContactResponseDto} from "@/api/response/client";
 
 export type NewTransactionFormValues = z.infer<typeof formSchema>;
 
@@ -51,7 +52,7 @@ export interface NewTransactionFormProps {
   onSubmitAction: (values: NewTransactionFormValues) => void;
   isPending: boolean;
   defaultValues?: SomePartial<NewTransactionFormValues, 'paymentCode'>;
-  recipients: Array<RecipientDto>;
+  recipients: Array<ClientContactResponseDto>;
   accounts: Array<AccountDto>;
 }
 
@@ -88,14 +89,14 @@ export default function NewTransactionForm({
 
   const handleRecipientChange = (value: string) => {
     const selectedRecipient = updatedRecipients.find(
-      (recipient) => recipient.name === value
+      (recipient) => recipient.nickname === value
     );
     if (selectedRecipient) {
       form.setValue(
         'recipientName',
-        selectedRecipient.name == 'New recipient' ? '' : selectedRecipient.name
+        selectedRecipient.nickname == 'New recipient' ? '' : selectedRecipient.nickname
       );
-      form.setValue('recipientAccount', selectedRecipient.account);
+      form.setValue('recipientAccount', selectedRecipient.accountNumber);
       form.clearErrors(['recipientName', 'recipientAccount']);
     }
   };
@@ -110,20 +111,18 @@ export default function NewTransactionForm({
             <SelectTrigger className="min-w-[200px]">
               <SelectValue placeholder="Select a recipient" />
             </SelectTrigger>
-            <SelectContent>
-              {updatedRecipients.map(
-                (
-                  recipient: {
-                    name: string;
-                  },
-                  index: number
-                ) => (
-                  <SelectItem key={index} value={recipient.name}>
-                    {recipient.name}
-                  </SelectItem>
-                )
-              )}
-            </SelectContent>
+              <SelectContent>
+                  {updatedRecipients.map(
+                      (
+                          recipient: ClientContactResponseDto | { name: string; account: string },
+                          index: number
+                      ) => (
+                          <SelectItem key={index} value={'nickname' in recipient ? recipient.nickname : recipient.name}>
+                              {'nickname' in recipient ? recipient.nickname : recipient.name}
+                          </SelectItem>
+                      )
+                  )}
+              </SelectContent>
           </Select>
         </div>
       </div>

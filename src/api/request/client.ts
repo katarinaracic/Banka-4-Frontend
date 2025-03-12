@@ -9,6 +9,7 @@ export interface CreatePaymentRequest {
   paymentCode: string;
   referenceNumber: string;
   paymentPurpose: string;
+  otpCode: string;
 }
 
 export interface SentCodeRequest {

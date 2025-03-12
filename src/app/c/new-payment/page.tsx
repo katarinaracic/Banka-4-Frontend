@@ -1,6 +1,6 @@
 'use client';
 import * as React from 'react';
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useHttpClient } from '@/context/HttpClientContext';
 import NewTransactionForm, {
@@ -9,15 +9,15 @@ import NewTransactionForm, {
 import { Card } from '@/components/ui/card';
 import { Dialog2FA } from '@/components/Dialog2FA';
 import { getAccounts } from '@/api/account';
-import { createPayment, sendCode } from '@/api/client';
+import {createPayment, getAllClientContacts, sendCode} from '@/api/client';
 import { RecipientDto } from '@/api/response/recipient';
 import { Toaster, toast } from 'sonner';
-import { PaymentResponseDto } from '@/api/response/client';
+import {ClientContactResponseDto, PaymentResponseDto} from '@/api/response/client';
+import {Axios} from "axios";
+import {Pageable} from "@/types/pageable";
 
 export default function NewPaymentPage() {
-  const [recipients] = useState<RecipientDto[]>(
-    []
-  ); /* TODO(marko): implement get recipients endpoint (when backend implements it...) */
+  ///const [recipients, setRecipients] = useState<ClientContactResponseDto[]>([]);
   const [isPending, setIsPending] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [paymentData, setPaymentData] =
@@ -25,9 +25,22 @@ export default function NewPaymentPage() {
 
   const client = useHttpClient();
 
-  const { data: accounts } = useQuery({
+  const { data: accounts, isLoading: isLoadingAccounts } = useQuery({
     queryKey: ['accounts'],
-    queryFn: async () => (await getAccounts(client)).data,
+    queryFn: async () => {
+      const response = await getAccounts(client);
+      console.log(response);
+      return response.data;
+    },
+  });
+
+
+  const { data: recipients, isLoading: isLoadingRecipients } = useQuery({
+    queryKey: ['recipients'],
+    queryFn: async () => {
+      const response = await getAllClientContacts(client, 10, 0);
+      return response.data.content;
+    },
   });
 
   const handleCreatePayment = async (data: NewTransactionFormValues) => {
@@ -50,6 +63,7 @@ export default function NewPaymentPage() {
         paymentCode: paymentData.paymentCode,
         paymentPurpose: paymentData.paymentPurpose,
         referenceNumber: paymentData.referenceNumber ?? '',
+        otpCode: otp,
       };
 
       const response: PaymentResponseDto = await createPayment(
@@ -75,7 +89,7 @@ export default function NewPaymentPage() {
         <NewTransactionForm
           onSubmitAction={handleCreatePayment}
           accounts={accounts || []}
-          recipients={recipients}
+          recipients={recipients || []}
           isPending={isPending}
         />
         <Dialog2FA

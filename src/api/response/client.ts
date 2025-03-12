@@ -27,3 +27,10 @@ export interface PaymentResponseDto {
   paymentDateTime: string;
   status: string;
 }
+
+export interface ClientContactResponseDto {
+  id: string;
+  nickname: string;
+  accountNumber: string;
+}
+

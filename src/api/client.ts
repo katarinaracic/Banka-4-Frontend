@@ -5,7 +5,7 @@ import {
   NewClientRequest,
   SentCodeRequest,
 } from '@/api/request/client';
-import { PaymentResponseDto } from '@/api/response/client';
+import {ClientContactResponseDto, PaymentResponseDto} from '@/api/response/client';
 import { ClientResponseDto } from './response/client';
 import { Pageable } from '@/types/pageable';
 
@@ -50,3 +50,13 @@ export const searchClients = async (
 
 export const sendCode = async (client: Axios, data: SentCodeRequest) =>
   client.post<void>('/verify/validate', data);
+
+export const getAllClientContacts = async (
+    client: Axios,
+    rowsPerPage: number,
+    currentPage: number
+) => {
+    return client.get<Pageable<ClientContactResponseDto>>('/client-contact', {
+        params: { size: rowsPerPage, page: currentPage },
+    });
+};
