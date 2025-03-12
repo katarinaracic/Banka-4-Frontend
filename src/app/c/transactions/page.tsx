@@ -1,8 +1,9 @@
 'use client';
-import { TransactionDto } from '@/api/response/transaction';
-import { PaymentFilters, searchPayments } from '@/api/transaction';
+import { TransactionDto, TransactionStatus } from '@/api/response/transaction';
+import { searchTransactions, TransactionFilters } from '@/api/transaction';
 import { DataTable } from '@/components/dataTable/DataTable';
-import FilterBar from '@/components/filters/FilterBar';
+import FilterBar, { FilterDefinition } from '@/components/filters/FilterBar';
+import GuardBlock from '@/components/GuardBlock';
 import { TransactionDialog } from '@/components/transaction/TransactionDialog';
 import {
   Card,
@@ -16,29 +17,67 @@ import useTablePageParams from '@/hooks/useTablePageParams';
 import { transactionColumns } from '@/ui/dataTables/transactions/transactionColumns';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 export default function TransactionsPage() {
+  const params = useSearchParams();
   const { page, pageSize, setPage, setPageSize } = useTablePageParams(
     'transactions',
     { pageSize: 8, page: 0 }
   );
   const client = useHttpClient();
-  const [modalOpen, setModalOpen] = useState(false);
   const [selectedTransaction, setSelectedTransaction] =
     useState<TransactionDto>();
 
-  const [paymentFilters, setPaymentFilters] = useState<PaymentFilters>({
+  // Initial filter values
+  const [paymentFilters, setPaymentFilters] = useState<TransactionFilters>({
     date: undefined,
     status: undefined,
     amount: undefined,
+    accountNumber: params.get('an') ?? '',
   });
+
+  const transactionFilterColumns: Record<
+    keyof TransactionFilters,
+    FilterDefinition
+  > = {
+    date: {
+      filterType: 'timestamp',
+      placeholder: 'Select date',
+    },
+    status: {
+      filterType: 'enum',
+      placeholder: 'Select status',
+      options: Object.values(TransactionStatus),
+      optionToString: (opt: string) => {
+        switch (opt) {
+          case TransactionStatus.REALIZED:
+            return 'Realized';
+          case TransactionStatus.REJECTED:
+            return 'Rejected';
+          case TransactionStatus.IN_PROGRESS:
+            return 'In Progress';
+          default:
+            throw new Error('optionToString not implemented for case: ' + opt);
+        }
+      },
+    },
+    amount: {
+      filterType: 'number',
+      placeholder: 'Enter amount',
+    },
+    accountNumber: {
+      filterType: 'string',
+      placeholder: 'Enter account number',
+    },
+  };
 
   const { dispatch } = useBreadcrumb();
   useEffect(() => {
     dispatch({
       type: 'SET_BREADCRUMB',
       items: [
-        { title: 'Home', url: '/' },
+        { title: 'Home', url: '/c' },
         { title: 'Transactions', url: '/c/transactions' },
         { title: 'Overview' },
       ],
@@ -46,9 +85,9 @@ export default function TransactionsPage() {
   }, [dispatch]);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['payment', page, pageSize],
+    queryKey: ['transaction', page, pageSize, paymentFilters],
     queryFn: async () => {
-      const response = await searchPayments(
+      const response = await searchTransactions(
         client,
         paymentFilters,
         page,
@@ -58,60 +97,53 @@ export default function TransactionsPage() {
     },
   });
 
-  const transactionFilterKeyToName = (key: keyof PaymentFilters): string => {
-    switch (key) {
-      case 'amount':
-        return 'Amount';
-      case 'date':
-        return 'Date';
-      case 'status':
-        return 'Status';
-    }
-  };
-
   return (
-    <div className="p-8">
-      <style>{'th, td {white-space: nowrap;}'}</style>
-      <TransactionDialog
-        dto={selectedTransaction}
-        open={modalOpen}
-        setOpen={setModalOpen}
-      />
-      <Card className="max-w-[900px] mx-auto">
-        <CardHeader>
-          <h1 className="text-2xl font-bold">Transactions Overview</h1>
-          <CardDescription>
-            This table provides a clear and organized overview of key
-            transaction details for quick reference and easy access.
-          </CardDescription>
-          {/* TODO: date, enum and number filters */}
-          <FilterBar<PaymentFilters>
-            filterKeyToName={transactionFilterKeyToName}
-            onSearch={(filter) => {
-              setPage(0);
-              setPaymentFilters(filter);
-            }}
-            filter={paymentFilters}
+    <GuardBlock>
+      <div className="p-8">
+        <style>{'th, td {white-space: nowrap;}'}</style>
+        {selectedTransaction && (
+          <TransactionDialog
+            dto={selectedTransaction}
+            open={true}
+            setOpen={(open) =>
+              setSelectedTransaction(open ? selectedTransaction : undefined)
+            }
           />
-        </CardHeader>
-        <CardContent className="rounded-lg overflow-hidden">
-          <DataTable
-            onRowClick={(row) => {
-              setSelectedTransaction(row.original);
-              setModalOpen(true);
-            }}
-            columns={transactionColumns}
-            data={data?.content ?? []}
-            isLoading={isLoading}
-            pageCount={data?.page.totalPages ?? 0}
-            pagination={{ page: page, pageSize }}
-            onPaginationChange={(newPagination) => {
-              setPage(newPagination.page);
-              setPageSize(newPagination.pageSize);
-            }}
-          />
-        </CardContent>
-      </Card>
-    </div>
+        )}
+        <Card className="max-w-[900px] mx-auto">
+          <CardHeader>
+            <h1 className="text-2xl font-bold">Transactions Overview</h1>
+            <CardDescription>
+              This table provides a clear and organized overview of key
+              transaction details for quick reference and easy access.
+            </CardDescription>
+            <FilterBar<TransactionFilters, typeof transactionFilterColumns>
+              onSubmit={(filter) => {
+                setPage(0);
+                setPaymentFilters(filter);
+              }}
+              filter={paymentFilters}
+              columns={transactionFilterColumns}
+            />
+          </CardHeader>
+          <CardContent className="rounded-lg overflow-hidden">
+            <DataTable
+              onRowClick={(row) => {
+                setSelectedTransaction(row.original);
+              }}
+              columns={transactionColumns}
+              data={data?.content ?? []}
+              isLoading={isLoading}
+              pageCount={data?.page.totalPages ?? 0}
+              pagination={{ page, pageSize }}
+              onPaginationChange={(newPagination) => {
+                setPage(newPagination.page);
+                setPageSize(newPagination.pageSize);
+              }}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </GuardBlock>
   );
 }

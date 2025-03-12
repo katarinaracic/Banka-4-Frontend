@@ -1,7 +1,7 @@
 'use client';
 import ClientForm, {
-  ClientFormValues,
   ClientFormAction,
+  ClientFormValues,
 } from '@/components/client/client-form';
 import {
   Card,
@@ -17,9 +17,9 @@ import { toastRequestError } from '@/api/errors';
 import { toast } from 'sonner';
 import { useEffect } from 'react';
 import { useBreadcrumb } from '@/context/BreadcrumbContext';
-import GuardBlock from '@/components/GuardBlock';
 import { EditClientRequest } from '@/api/request/client';
 import { getClientById, updateClientById } from '@/api/client';
+import GuardBlock from '@/components/GuardBlock';
 
 type EditClientParams = {
   id: string;
@@ -45,7 +45,7 @@ export default function EditClientPage() {
     dispatch({
       type: 'SET_BREADCRUMB',
       items: [
-        { title: 'Home', url: '/' },
+        { title: 'Home', url: '/e' },
         { title: 'Clients', url: '/e/client' },
         { title: 'Edit' },
       ],
@@ -96,7 +96,7 @@ export default function EditClientPage() {
   }
 
   return (
-    <GuardBlock requiredPrivileges={['ADMIN']}>
+    <GuardBlock requiredUserType={'employee'}>
       <div className="flex justify-center items-center pt-16">
         <Card className="w-[800px]">
           <CardHeader>

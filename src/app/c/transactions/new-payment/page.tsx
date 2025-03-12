@@ -6,11 +6,22 @@ import { useHttpClient } from '@/context/HttpClientContext';
 import NewTransactionForm, {
   NewTransactionFormValues,
 } from '@/components/client/new-transaction-form';
-import { Card } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from '@/components/ui/card';
 import { Dialog2FA } from '@/components/Dialog2FA';
+import { getClientAccounts } from '@/api/account';
+import { createPayment, sendCode } from '@/api/client';
 import { getAccounts } from '@/api/account';
 import { createPayment, getAllClientContacts, sendCode } from '@/api/client';
 import { RecipientDto } from '@/api/response/recipient';
+import { toast } from 'sonner';
+import { PaymentResponseDto } from '@/api/response/client';
+import GuardBlock from '@/components/GuardBlock';
+import { useBreadcrumb } from '@/context/BreadcrumbContext';
 import { Toaster, toast } from 'sonner';
 import {
   ClientContactResponseDto,
@@ -21,6 +32,20 @@ import { Pageable } from '@/types/pageable';
 
 export default function NewPaymentPage() {
   ///const [recipients, setRecipients] = useState<ClientContactResponseDto[]>([]);
+  const { dispatch } = useBreadcrumb();
+  useEffect(() => {
+    dispatch({
+      type: 'SET_BREADCRUMB',
+      items: [
+        { title: 'Home', url: '/c' },
+        { title: 'Transactions', url: '/c/transactions' },
+        { title: 'New Payment' },
+      ],
+    });
+  }, [dispatch]);
+  const [recipients] = useState<RecipientDto[]>(
+    []
+  ); /* TODO(marko): implement get recipients endpoint (when backend implements it...) */
   const [isPending, setIsPending] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [paymentData, setPaymentData] =
@@ -86,21 +111,33 @@ export default function NewPaymentPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <Card className="w-[430px] p-4">
-        <NewTransactionForm
-          onSubmitAction={handleCreatePayment}
-          accounts={accounts || []}
-          recipients={recipients || []}
-          isPending={isPending}
-        />
-        <Dialog2FA
-          open={isDialogOpen}
-          onSubmit={handleDialogSubmit}
-          onCancel={() => setIsDialogOpen(false)}
-        />
-      </Card>
-      <Toaster />
-    </div>
+    <GuardBlock requiredUserType={'client'}>
+      <div className={'pt-8 flex justify-center'}>
+        <Card className="w-[800px]">
+          <CardHeader>
+            <h1 className="text-2xl font-bold">Make a new payment</h1>
+            <CardDescription>
+              Quickly send money to another account with just a few taps. Fast,
+              secure, and hassle-free.
+            </CardDescription>
+          </CardHeader>
+          <hr className={'mx-6'} />
+          <CardContent className={'pt-6'}>
+            <NewTransactionForm
+              onSubmitAction={handleCreatePayment}
+              accounts={accounts || []}
+              recipients={recipients || []}
+              isPending={isPending}
+            />
+            <Dialog2FA
+              open={isDialogOpen}
+              onSubmit={handleDialogSubmit}
+              onCancel={() => setIsDialogOpen(false)}
+            />
+          </CardContent>
+        </Card>
+          <Toaster />
+      </div>
+    </GuardBlock>
   );
 }

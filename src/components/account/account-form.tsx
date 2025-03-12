@@ -24,7 +24,7 @@ import { Switch } from '../ui/switch';
 import { currencyOptions } from '@/types/currency';
 
 const formSchema = z.object({
-  amount: z.coerce.number().min(1),
+  amount: z.coerce.number().min(0),
   currency: z.enum(currencyOptions),
   makeCard: z.boolean(),
 });
@@ -33,9 +33,10 @@ export type AccountFormData = z.infer<typeof formSchema>;
 
 interface AccountFormProps {
   onSubmit: (data: AccountFormData) => void;
+  isPending: boolean;
 }
 
-export default function AccountForm({ onSubmit }: AccountFormProps) {
+export default function AccountForm({ onSubmit, isPending }: AccountFormProps) {
   const form = useForm<AccountFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: { amount: 0, currency: 'RSD', makeCard: false },
@@ -59,6 +60,7 @@ export default function AccountForm({ onSubmit }: AccountFormProps) {
                 <Input
                   {...field}
                   type="number"
+                  min={0}
                   onChange={field.onChange}
                   placeholder="Enter amount"
                 />
@@ -114,7 +116,9 @@ export default function AccountForm({ onSubmit }: AccountFormProps) {
           )}
         />
 
-        <Button type="submit">Submit</Button>
+        <Button type="submit" disabled={isPending}>
+          Submit
+        </Button>
       </form>
     </Form>
   );

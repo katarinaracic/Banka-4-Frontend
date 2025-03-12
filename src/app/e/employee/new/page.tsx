@@ -30,7 +30,7 @@ export default function NewEmployeePage() {
     dispatch({
       type: 'SET_BREADCRUMB',
       items: [
-        { title: 'Home', url: '/' },
+        { title: 'Home', url: '/e' },
         { title: 'Employees', url: '/e/employee' },
         { title: 'New' },
       ],
@@ -71,8 +71,8 @@ export default function NewEmployeePage() {
   }
 
   return (
-    <GuardBlock requiredPrivileges={['ADMIN']}>
-      <div className="flex justify-center items-center pt-16">
+    <GuardBlock requiredUserType={'employee'} requiredPrivileges={['ADMIN']}>
+      <div className="flex justify-center items-center py-12">
         <Card className="w-[800px]">
           <CardHeader>
             <CardTitle>Add New Employee</CardTitle>

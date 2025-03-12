@@ -1,7 +1,12 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from '@/components/ui/card';
 import { useHttpClient } from '@/context/HttpClientContext';
 import { useBreadcrumb } from '@/context/BreadcrumbContext';
 import GuardBlock from '@/components/GuardBlock';
@@ -11,7 +16,7 @@ import { searchEmployees } from '@/api/employee';
 import { DataTable } from '@/components/dataTable/DataTable';
 import { employeesColumns } from '@/ui/dataTables/employees/employeesColumns';
 import useTablePageParams from '@/hooks/useTablePageParams';
-import FilterBar from '@/components/filters/FilterBar';
+import FilterBar, { FilterDefinition } from '@/components/filters/FilterBar';
 
 interface EmployeeFilter {
   firstName: string;
@@ -20,17 +25,23 @@ interface EmployeeFilter {
   position: string;
 }
 
-const employeeFilterKeyToName = (key: keyof EmployeeFilter): string => {
-  switch (key) {
-    case 'firstName':
-      return 'first name';
-    case 'lastName':
-      return 'last name';
-    case 'email':
-      return 'email';
-    case 'position':
-      return 'position';
-  }
+const employeeFilterColumns: Record<keyof EmployeeFilter, FilterDefinition> = {
+  firstName: {
+    filterType: 'string',
+    placeholder: 'Enter first name',
+  },
+  lastName: {
+    filterType: 'string',
+    placeholder: 'Enter last name',
+  },
+  email: {
+    filterType: 'string',
+    placeholder: 'Enter email',
+  },
+  position: {
+    filterType: 'string',
+    placeholder: 'Enter position',
+  },
 };
 
 const EmployeeOverviewPage: React.FC = () => {
@@ -47,7 +58,6 @@ const EmployeeOverviewPage: React.FC = () => {
   });
 
   const router = useRouter();
-
   const client = useHttpClient();
 
   const { data, isLoading } = useQuery({
@@ -68,7 +78,7 @@ const EmployeeOverviewPage: React.FC = () => {
     dispatch({
       type: 'SET_BREADCRUMB',
       items: [
-        { title: 'Home', url: '/' },
+        { title: 'Home', url: '/e' },
         { title: 'Employees', url: '/e/employee' },
         { title: 'Overview' },
       ],
@@ -76,22 +86,22 @@ const EmployeeOverviewPage: React.FC = () => {
   }, [dispatch]);
 
   return (
-    <GuardBlock requiredPrivileges={['ADMIN']}>
+    <GuardBlock requiredUserType="employee" requiredPrivileges={['ADMIN']}>
       <div className="p-8">
         <Card className="max-w-[900px] mx-auto">
           <CardHeader>
             <h1 className="text-2xl font-bold">Employees Overview</h1>
-            <p className="text-sm text-zinc-500">
+            <CardDescription>
               This table provides a clear and organized overview of key employee
               details for quick reference and easy access.
-            </p>
-            <FilterBar<EmployeeFilter>
-              filterKeyToName={employeeFilterKeyToName}
-              onSearch={(filter) => {
+            </CardDescription>
+            <FilterBar<EmployeeFilter, typeof employeeFilterColumns>
+              onSubmit={(filter) => {
                 setPage(0);
                 setSearchFilter(filter);
               }}
               filter={searchFilter}
+              columns={employeeFilterColumns}
             />
           </CardHeader>
           <CardContent className="rounded-lg overflow-hidden">
@@ -103,7 +113,7 @@ const EmployeeOverviewPage: React.FC = () => {
               data={data?.content ?? []}
               isLoading={isLoading}
               pageCount={data?.page.totalPages ?? 0}
-              pagination={{ page: page, pageSize }}
+              pagination={{ page, pageSize }}
               onPaginationChange={(newPagination) => {
                 setPage(newPagination.page);
                 setPageSize(newPagination.pageSize);
