@@ -13,25 +13,14 @@ import {
   CardHeader,
 } from '@/components/ui/card';
 import { Dialog2FA } from '@/components/Dialog2FA';
-import { getClientAccounts } from '@/api/account';
-import { createPayment, sendCode } from '@/api/client';
 import { getAccounts } from '@/api/account';
 import { createPayment, getAllClientContacts, sendCode } from '@/api/client';
-import { RecipientDto } from '@/api/response/recipient';
-import { toast } from 'sonner';
 import { PaymentResponseDto } from '@/api/response/client';
 import GuardBlock from '@/components/GuardBlock';
 import { useBreadcrumb } from '@/context/BreadcrumbContext';
 import { Toaster, toast } from 'sonner';
-import {
-  ClientContactResponseDto,
-  PaymentResponseDto,
-} from '@/api/response/client';
-import { Axios } from 'axios';
-import { Pageable } from '@/types/pageable';
 
 export default function NewPaymentPage() {
-  ///const [recipients, setRecipients] = useState<ClientContactResponseDto[]>([]);
   const { dispatch } = useBreadcrumb();
   useEffect(() => {
     dispatch({
@@ -43,9 +32,7 @@ export default function NewPaymentPage() {
       ],
     });
   }, [dispatch]);
-  const [recipients] = useState<RecipientDto[]>(
-    []
-  ); /* TODO(marko): implement get recipients endpoint (when backend implements it...) */
+  /* TODO(marko): implement get recipients endpoint (when backend implements it...) */
   const [isPending, setIsPending] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [paymentData, setPaymentData] =
@@ -136,7 +123,7 @@ export default function NewPaymentPage() {
             />
           </CardContent>
         </Card>
-          <Toaster />
+        <Toaster />
       </div>
     </GuardBlock>
   );

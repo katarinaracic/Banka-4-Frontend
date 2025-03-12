@@ -22,7 +22,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { PAYMENT_CODE_MAP } from '@/lib/payment-utils';
-import { RecipientDto } from '@/api/response/recipient';
 import { AccountDto } from '@/api/response/account';
 import { Switch } from '@/components/ui/switch';
 import { SomePartial } from '@/types/utils';
