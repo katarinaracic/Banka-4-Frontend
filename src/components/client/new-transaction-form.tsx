@@ -82,7 +82,7 @@ export default function NewTransactionForm({
   }
 
   const updatedRecipients = [
-    { name: 'New recipient', account: '' },
+    { nickname: 'New recipient', accountNumber: '' },
     ...recipients,
   ];
 
@@ -117,7 +117,7 @@ export default function NewTransactionForm({
                 (
                   recipient:
                     | ClientContactResponseDto
-                    | { name: string; account: string },
+                    | { nickname: string; accountNumber: string },
                   index: number
                 ) => (
                   <SelectItem
@@ -125,12 +125,12 @@ export default function NewTransactionForm({
                     value={
                       'nickname' in recipient
                         ? recipient.nickname
-                        : recipient.name
+                        : recipient.nickname
                     }
                   >
                     {'nickname' in recipient
                       ? recipient.nickname
-                      : recipient.name}
+                      : recipient.nickname}
                   </SelectItem>
                 )
               )}
