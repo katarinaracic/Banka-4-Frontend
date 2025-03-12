@@ -33,4 +33,3 @@ export interface ClientContactResponseDto {
   nickname: string;
   accountNumber: string;
 }
-

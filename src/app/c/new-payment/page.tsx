@@ -1,6 +1,6 @@
 'use client';
 import * as React from 'react';
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useHttpClient } from '@/context/HttpClientContext';
 import NewTransactionForm, {
@@ -9,12 +9,15 @@ import NewTransactionForm, {
 import { Card } from '@/components/ui/card';
 import { Dialog2FA } from '@/components/Dialog2FA';
 import { getAccounts } from '@/api/account';
-import {createPayment, getAllClientContacts, sendCode} from '@/api/client';
+import { createPayment, getAllClientContacts, sendCode } from '@/api/client';
 import { RecipientDto } from '@/api/response/recipient';
 import { Toaster, toast } from 'sonner';
-import {ClientContactResponseDto, PaymentResponseDto} from '@/api/response/client';
-import {Axios} from "axios";
-import {Pageable} from "@/types/pageable";
+import {
+  ClientContactResponseDto,
+  PaymentResponseDto,
+} from '@/api/response/client';
+import { Axios } from 'axios';
+import { Pageable } from '@/types/pageable';
 
 export default function NewPaymentPage() {
   ///const [recipients, setRecipients] = useState<ClientContactResponseDto[]>([]);
@@ -33,7 +36,6 @@ export default function NewPaymentPage() {
       return response.data;
     },
   });
-
 
   const { data: recipients, isLoading: isLoadingRecipients } = useQuery({
     queryKey: ['recipients'],

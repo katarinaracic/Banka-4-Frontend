@@ -26,7 +26,7 @@ import { RecipientDto } from '@/api/response/recipient';
 import { AccountDto } from '@/api/response/account';
 import { Switch } from '@/components/ui/switch';
 import { SomePartial } from '@/types/utils';
-import {ClientContactResponseDto} from "@/api/response/client";
+import { ClientContactResponseDto } from '@/api/response/client';
 
 export type NewTransactionFormValues = z.infer<typeof formSchema>;
 
@@ -94,7 +94,9 @@ export default function NewTransactionForm({
     if (selectedRecipient) {
       form.setValue(
         'recipientName',
-        selectedRecipient.nickname == 'New recipient' ? '' : selectedRecipient.nickname
+        selectedRecipient.nickname == 'New recipient'
+          ? ''
+          : selectedRecipient.nickname
       );
       form.setValue('recipientAccount', selectedRecipient.accountNumber);
       form.clearErrors(['recipientName', 'recipientAccount']);
@@ -111,18 +113,29 @@ export default function NewTransactionForm({
             <SelectTrigger className="min-w-[200px]">
               <SelectValue placeholder="Select a recipient" />
             </SelectTrigger>
-              <SelectContent>
-                  {updatedRecipients.map(
-                      (
-                          recipient: ClientContactResponseDto | { name: string; account: string },
-                          index: number
-                      ) => (
-                          <SelectItem key={index} value={'nickname' in recipient ? recipient.nickname : recipient.name}>
-                              {'nickname' in recipient ? recipient.nickname : recipient.name}
-                          </SelectItem>
-                      )
-                  )}
-              </SelectContent>
+            <SelectContent>
+              {updatedRecipients.map(
+                (
+                  recipient:
+                    | ClientContactResponseDto
+                    | { name: string; account: string },
+                  index: number
+                ) => (
+                  <SelectItem
+                    key={index}
+                    value={
+                      'nickname' in recipient
+                        ? recipient.nickname
+                        : recipient.name
+                    }
+                  >
+                    {'nickname' in recipient
+                      ? recipient.nickname
+                      : recipient.name}
+                  </SelectItem>
+                )
+              )}
+            </SelectContent>
           </Select>
         </div>
       </div>
