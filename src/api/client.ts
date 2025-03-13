@@ -1,20 +1,16 @@
 import { Axios } from 'axios';
-import {
-  CreatePaymentRequest,
-  EditClientRequest,
-  NewClientRequest,
-  SentCodeRequest,
-} from '@/api/request/client';
+import { EditClientRequest, NewClientRequest } from '@/api/request/client';
 import {
   ClientContactResponseDto,
   PaymentResponseDto,
 } from '@/api/response/client';
 import { ClientResponseDto } from './response/client';
 import { Pageable } from '@/types/pageable';
+import { NewPaymentRequest } from '@/api/request/transaction';
 
 export const createPayment = async (
   client: Axios,
-  data: CreatePaymentRequest
+  data: NewPaymentRequest
 ): Promise<PaymentResponseDto> => {
   const response = await client.post<PaymentResponseDto>(
     '/transaction/payment',
@@ -50,9 +46,6 @@ export const searchClients = async (
     params: { ...filters, size: rowsPerPage, page: currentPage },
   });
 };
-
-export const sendCode = async (client: Axios, data: SentCodeRequest) =>
-  client.post<void>('/verify/validate', data);
 
 export const getAllClientContacts = async (
   client: Axios,
