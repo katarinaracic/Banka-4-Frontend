@@ -79,7 +79,9 @@ const ClientHomePage: React.FC = () => {
             owner: account.client.firstName + ' ' + account.client.lastName,
             type: account.accountType,
             availableBalance: account.availableBalance,
-            reservedBalance: 0 /* TODO(marko): this sprint, reservedBalance is always 0, fix this when the time comes */,
+            reservedBalance: 0,
+            company:
+              account.company /* TODO(marko): this sprint, reservedBalance is always 0, fix this when the time comes */,
           }))}
           onSelect={(accountNumber: string) => {
             const account =
